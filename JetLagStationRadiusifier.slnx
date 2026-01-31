@@ -1,4 +1,3 @@
 <Solution>
   <Project Path="JetLagStationRadiusifier.Common/JetLagStationRadiusifier.Common.csproj" />
-  <Project Path="JetLagStationRadiusifier/JetLagStationRadiusifier.Winforms.csproj" />
 </Solution>
