@@ -1,0 +1,22 @@
+﻿namespace JetLagStationRadiusifier.Common.Models;
+
+/// <summary>
+/// Represents a positive distance measured in meters.
+/// Guarantees value is valid at creation time.
+/// </summary>
+public readonly struct Distance
+{
+    public double Meters { get; }
+
+    private Distance(double meters)
+    {
+        if (meters <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(meters), "Distance must be greater than zero."); 
+        }
+
+        Meters = meters;
+    }
+
+    public static Distance FromMeters(double meters) => new(meters);
+}
