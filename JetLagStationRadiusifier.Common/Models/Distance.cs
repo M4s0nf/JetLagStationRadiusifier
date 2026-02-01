@@ -6,7 +6,7 @@
 /// </summary>
 public readonly struct Distance
 {
-    public double Meters { get; }
+    public double Metres { get; }
 
     private Distance(double meters)
     {
@@ -15,7 +15,7 @@ public readonly struct Distance
             throw new ArgumentOutOfRangeException(nameof(meters), "Distance must be greater than zero."); 
         }
 
-        Meters = meters;
+        Metres = meters;
     }
 
     public static Distance FromMeters(double meters) => new(meters);

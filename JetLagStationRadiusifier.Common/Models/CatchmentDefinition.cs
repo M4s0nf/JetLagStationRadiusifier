@@ -1,6 +1,4 @@
-﻿//using JetLagStationRadiusifier.Common.Enums;
-
-namespace JetLagStationRadiusifier.Common.Models;
+﻿namespace JetLagStationRadiusifier.Common.Models;
 
 /// <summary>
 /// Engine-ready specs required to draw the catchments.
@@ -8,7 +6,7 @@ namespace JetLagStationRadiusifier.Common.Models;
 public sealed record CatchmentDefinition
 {
     public required Distance Radius { get; init; }
-    public required Rgba FillColor { get; init; }
+    public required Rgba BorderColour { get; init; }
     public string KmlLayerName { get; init; } = "Catchments";
     public int Segments { get; init; } = 64;
 }

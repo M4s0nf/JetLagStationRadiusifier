@@ -1,5 +1,7 @@
 ﻿using System.Globalization;
 using System.Xml.Linq;
+using JetLagStationRadiusifier.Common.Helpers;
+using JetLagStationRadiusifier.Common.Infrastructure.Kml;
 using JetLagStationRadiusifier.Common.Models;
 
 namespace JetLagStationRadiusifier.Common.Engine;
@@ -7,8 +9,11 @@ namespace JetLagStationRadiusifier.Common.Engine;
 public sealed class CatchmentEngine : ICatchmentEngine
 {
     private const double EarthRadiusMeters = 6371000.0;
-    private static readonly char[] Separators = [' ', '\n', '\r', '\t'];
 
+    // KML coordinate tuples can be separated by various whitespace characters.
+    private static readonly char[] CoordinateTupleSeparators = [' ', '\n', '\r', '\t'];
+
+    /// <inheritdoc/>
     public void AddCatchments(string inputKmlPath, string outputKmlPath, CatchmentDefinition definition)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(inputKmlPath);
@@ -20,168 +25,201 @@ public sealed class CatchmentEngine : ICatchmentEngine
             throw new FileNotFoundException("Input KML not found.", inputKmlPath);
         }
 
-        // Minimal validation beyond what Distance already guarantees
-        var segments = definition.Segments;
+        // We want a reasonably smooth circle. Very low segment counts look visibly polygonal.
         if (definition.Segments < 8)
         {
-            throw new InvalidOperationException($"Segments must be >= 8. segments. actual: {segments}");
+            throw new InvalidOperationException($"Segments must be >= 8. actual: {definition.Segments}");
         }
 
-        XNamespace kmlNamespace = "http://www.opengis.net/kml/2.2";
+        XNamespace kmlNamespace = KmlSchema.NamespaceUri;
 
-        var kmlDoc = XDocument.Load(inputKmlPath);
-        var root = kmlDoc.Root ?? throw new InvalidOperationException("Invalid KML: missing root element.");
+        var kmlDocument = XDocument.Load(inputKmlPath);
+        var rootElement = kmlDocument.Root ?? throw new InvalidOperationException("Invalid KML: missing root element.");
 
-        // Ensure <Document> exists
-        var document = root.Element(kmlNamespace + "Document");
-        if (document == null)
+        var documentElement = rootElement.Element(kmlNamespace + KmlSchema.Document);
+        if (documentElement == null)
         {
-            document = new XElement(kmlNamespace + "Document");
-            root.Add(document);
+            // Some KML files might be missing <Document>. We create it to keep output consistent.
+            documentElement = new XElement(kmlNamespace + KmlSchema.Document);
+            rootElement.Add(documentElement);
         }
 
-        // Style setup
         var styleId = BuildStyleId(definition);
-        EnsureStyleExists(document, kmlNamespace, styleId, definition);
+        EnsureStyleExists(documentElement, kmlNamespace, styleId, definition);
 
-        // Create folder/layer for catchments
-        var catchmentsFolder = new XElement(kmlNamespace + "Folder",
-            new XElement(kmlNamespace + "name", definition.KmlLayerName)
+        var catchmentsFolderElement = new XElement(
+            kmlNamespace + KmlSchema.Folder,
+            new XElement(kmlNamespace + KmlSchema.Name, definition.KmlLayerName)
         );
 
-        // Materialize placemarks to avoid deferred enumeration surprises
-        var stops = document
-            .Descendants(kmlNamespace + "Placemark")
-            .Where(pm => pm.Element(kmlNamespace + "Point") != null)
+        // Materialize to a list: we'll be adding new nodes under <Document> and don't want deferred-enum surprises.
+        var stationPlacemarks = documentElement
+            .Descendants(kmlNamespace + KmlSchema.Placemark)
+            .Where(placemark => placemark.Element(kmlNamespace + KmlSchema.Point) != null)
             .ToList();
 
-        foreach (var stop in stops)
+        foreach (var stationPlacemark in stationPlacemarks)
         {
-            var name = (string?)stop.Element(kmlNamespace + "name") ?? "Stop";
+            var stationName = (string?)stationPlacemark.Element(kmlNamespace + KmlSchema.Name)
+                ?? KmlSchema.DefaultStationName;
 
-            var coordText = stop
-                .Descendants(kmlNamespace + "Point")
-                .Elements(kmlNamespace + "coordinates")
-                .Select(x => (x.Value ?? "").Trim())
+            var coordinateText = stationPlacemark
+                .Descendants(kmlNamespace + KmlSchema.Point)
+                .Elements(kmlNamespace + KmlSchema.Coordinates)
+                .Select(element => (element.Value ?? string.Empty).Trim())
                 .FirstOrDefault();
 
-            if (string.IsNullOrWhiteSpace(coordText))
+            if (string.IsNullOrWhiteSpace(coordinateText))
             {
                 continue;
             }
 
-            // KML coordinates may contain multiple tuples separated by whitespace; take first tuple
-            var firstTuple = coordText
-                .Split(Separators, StringSplitOptions.RemoveEmptyEntries)
+            // KML <coordinates> can contain multiple tuples; the first is enough for a Point.
+            var firstCoordinateTuple = coordinateText
+                .Split(CoordinateTupleSeparators, StringSplitOptions.RemoveEmptyEntries)
                 .FirstOrDefault();
 
-            if (firstTuple == null)
+            if (firstCoordinateTuple == null)
             {
                 continue;
             }
 
-            // Tuple is: lon,lat[,alt]
-            var parts = firstTuple.Split(',');
-            if (parts.Length < 2)
+            // Tuple format: lon,lat[,alt]
+            var tupleParts = firstCoordinateTuple.Split(',');
+            if (tupleParts.Length < 2)
+            {
                 continue;
+            }
 
-            if (!double.TryParse(parts[1], NumberStyles.Float, CultureInfo.InvariantCulture, out var lat))
+            var parsedLatitude = double.TryParse(tupleParts[1], NumberStyles.Float, CultureInfo.InvariantCulture, out double latitudeDegrees);
+            if (parsedLatitude == false)
+            {
                 continue;
+            }
 
-            if (!double.TryParse(parts[0], NumberStyles.Float, CultureInfo.InvariantCulture, out var lon))
+            var parsedLongitude = double.TryParse(tupleParts[0], NumberStyles.Float, CultureInfo.InvariantCulture, out double longitudeDegrees);
+            if (parsedLongitude == false)
+            {
                 continue;
+            }
 
-            var coords = BuildCircleCoordinates(lat, lon, definition.Radius.Meters, definition.Segments);
-
-            var polygonPlacemark = new XElement(kmlNamespace + "Placemark",
-                new XElement(kmlNamespace + "name", $"{name} ({FormatRadius(definition.Radius.Meters)})"),
-                new XElement(kmlNamespace + "styleUrl", $"#{styleId}"),
-                new XElement(kmlNamespace + "Polygon",
-                    new XElement(kmlNamespace + "tessellate", "1"),
-                    new XElement(kmlNamespace + "outerBoundaryIs",
-                        new XElement(kmlNamespace + "LinearRing",
-                            new XElement(kmlNamespace + "coordinates", coords)
-                        )
-                    )
-                )
+            var circleCoordinates = BuildCircleCoordinates(
+                latitudeDegrees, longitudeDegrees, definition.Radius.Metres, definition.Segments
             );
 
-            catchmentsFolder.Add(polygonPlacemark);
+            var catchmentPlacemarkElement =
+                new XElement(kmlNamespace + KmlSchema.Placemark,
+                    new XElement(kmlNamespace + KmlSchema.Name, $"{stationName} ({FormatRadius(definition.Radius.Metres)})"),
+                    new XElement(kmlNamespace + KmlSchema.StyleUrl, $"#{styleId}"),
+                    new XElement(kmlNamespace + KmlSchema.Polygon,
+                        new XElement(kmlNamespace + KmlSchema.Tessellate, KmlSchema.TessellateOn),
+                        new XElement(kmlNamespace + KmlSchema.OuterBoundaryIs,
+                            new XElement(kmlNamespace + KmlSchema.LinearRing,
+                                new XElement(kmlNamespace + KmlSchema.Coordinates, circleCoordinates)))));
+
+            catchmentsFolderElement.Add(catchmentPlacemarkElement);
         }
 
-        document.Add(catchmentsFolder);
-        kmlDoc.Save(outputKmlPath);
+        documentElement.Add(catchmentsFolderElement);
+        kmlDocument.Save(outputKmlPath);
     }
 
     private static string BuildStyleId(CatchmentDefinition definition)
     {
-        // Keeps it stable and somewhat unique. You can simplify to a constant if you prefer.
-        // Avoid spaces and weird chars in XML id.
-        var r = (int)Math.Round(definition.Radius.Meters);
-        return $"catchment-{r}m";
+        // Keep the ID stable and XML-friendly. Radius is the main differentiator.
+        int radiusMetresRounded = (int)Math.Round(definition.Radius.Metres);
+        return $"catchment-{radiusMetresRounded}m";
     }
 
-    private static void EnsureStyleExists(XElement document, XNamespace k, string styleId, CatchmentDefinition definition)
+    private static void EnsureStyleExists(
+        XElement documentElement,
+        XNamespace kmlNamespace,
+        string styleId,
+        CatchmentDefinition definition)
     {
-        var exists = document.Elements(k + "Style")
-                             .Any(s => (string?)s.Attribute("id") == styleId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(styleId);
 
-        if (exists) return;
+        var styleAlreadyExists = documentElement
+            .Elements(kmlNamespace + KmlSchema.Style)
+            .Any(styleElement => (string?)styleElement.Attribute(KmlSchema.StyleIdAttribute) == styleId);
 
-        document.AddFirst(
-            new XElement(k + "Style",
-                new XAttribute("id", styleId),
-                new XElement(k + "LineStyle",
-                    new XElement(k + "color", definition.FillColor.ToKmlColor()),
-                    new XElement(k + "width", "1.5")
-                ),
-                new XElement(k + "PolyStyle",
-                    new XElement(k + "color", definition.FillColor.ToKmlColor()),
-                    new XElement(k + "fill", "1"),
-                    new XElement(k + "outline", "1")
-                )
-            )
-        );
-    }
-
-    private static string BuildCircleCoordinates(double latDeg, double lonDeg, double radiusMeters, int segments)
-    {
-        var coords = new string[segments + 1];
-        var step = 360.0 / segments;
-
-        for (int i = 0; i < segments; i++)
+        if (styleAlreadyExists)
         {
-            var bearing = i * step;
-            var (lat2, lon2) = DestinationPoint(latDeg, lonDeg, bearing, radiusMeters);
-            coords[i] = string.Create(CultureInfo.InvariantCulture, $"{lon2},{lat2},0");
+            return;
         }
 
-        coords[segments] = coords[0]; // close ring
-        return string.Join(" ", coords);
+        // Keep styling logic centralized so it can evolve without touching XML-writing code.
+        (string borderKmlColour, string fillKmlColour) = KmlColorRules.DeriveBorderAndFill(definition);
+
+        var styleElement =
+            new XElement(kmlNamespace + KmlSchema.Style,
+                new XAttribute(KmlSchema.StyleIdAttribute, styleId),
+                new XElement(kmlNamespace + KmlSchema.LineStyle,
+                    new XElement(kmlNamespace + KmlSchema.Color, borderKmlColour),
+                    new XElement(kmlNamespace + KmlSchema.Width, KmlSchema.LineWidth)),
+                new XElement(kmlNamespace + KmlSchema.PolyStyle,
+                    new XElement(kmlNamespace + KmlSchema.Color, fillKmlColour),
+                    new XElement(kmlNamespace + KmlSchema.Fill, KmlSchema.FillOn),
+                    new XElement(kmlNamespace + KmlSchema.Outline, KmlSchema.OutlineOn)));
+
+        // Add near the top so styles are easy to find when inspecting output.
+        documentElement.AddFirst(styleElement);
     }
 
-    private static (double latDeg, double lonDeg) DestinationPoint(double latDeg, double lonDeg, double bearingDeg, double distanceM)
+    private static string BuildCircleCoordinates(double latitudeDegrees, double longitudeDegrees, double radiusMeters, int segments)
     {
-        var lat1 = ToRad(latDeg);
-        var lon1 = ToRad(lonDeg);
-        var brng = ToRad(bearingDeg);
-        var dr = distanceM / EarthRadiusMeters;
+        var coordinateTuples = new string[segments + 1];
+        var stepDegrees = 360.0 / segments;
 
-        var lat2 = Math.Asin(Math.Sin(lat1) * Math.Cos(dr) +
-                             Math.Cos(lat1) * Math.Sin(dr) * Math.Cos(brng));
+        for (int segmentIndex = 0; segmentIndex < segments; segmentIndex++)
+        {
+            var bearingDegrees = segmentIndex * stepDegrees;
 
-        var lon2 = lon1 + Math.Atan2(Math.Sin(brng) * Math.Sin(dr) * Math.Cos(lat1),
-                                     Math.Cos(dr) - Math.Sin(lat1) * Math.Sin(lat2));
+            (var destinationLatitude, var destinationLongitude) = DestinationPoint(latitudeDegrees, longitudeDegrees, bearingDegrees, radiusMeters);
 
-        // Normalize to [-180, 180)
-        var lonDegNorm = ((ToDeg(lon2) + 540) % 360) - 180;
+            coordinateTuples[segmentIndex] = string.Create(
+                CultureInfo.InvariantCulture,
+                $"{destinationLongitude},{destinationLatitude},{KmlSchema.RingAltitude}"
+            );
+        }
 
-        return (ToDeg(lat2), lonDegNorm);
+        // KML rings must repeat the first coordinate at the end to "close" the polygon.
+        coordinateTuples[segments] = coordinateTuples[0];
+
+        return string.Join(" ", coordinateTuples);
     }
 
-    private static double ToRad(double deg) => deg * Math.PI / 180.0;
-    private static double ToDeg(double rad) => rad * 180.0 / Math.PI;
+    private static (double latDeg, double lonDeg) DestinationPoint(
+        double latitudeDegrees,
+        double longitudeDegrees,
+        double bearingDegrees,
+        double distanceMeters)
+    {
+        var latitudeRadians = ToRadians(latitudeDegrees);
+        var longitudeRadians = ToRadians(longitudeDegrees);
+        var bearingRadians = ToRadians(bearingDegrees);
 
-    private static string FormatRadius(double meters)
-        => $"{Math.Round(meters)}m";
+        double angularDistance = distanceMeters / EarthRadiusMeters;
+
+        var destinationLatitudeRadians =
+            Math.Asin(
+                Math.Sin(latitudeRadians) * Math.Cos(angularDistance) +
+                Math.Cos(latitudeRadians) * Math.Sin(angularDistance) * Math.Cos(bearingRadians));
+
+        var destinationLongitudeRadians =
+            longitudeRadians +
+            Math.Atan2(
+                Math.Sin(bearingRadians) * Math.Sin(angularDistance) * Math.Cos(latitudeRadians),
+                Math.Cos(angularDistance) - Math.Sin(latitudeRadians) * Math.Sin(destinationLatitudeRadians));
+
+        // KML longitudes should be normalized to [-180, 180) to avoid wrapping artefacts.
+        var destinationLongitudeDegreesNormalised = ((ToDegrees(destinationLongitudeRadians) + 540) % 360) - 180;
+        return (ToDegrees(destinationLatitudeRadians), destinationLongitudeDegreesNormalised);
+    }
+
+    private static double ToRadians(double degrees) => degrees * Math.PI / 180.0;
+
+    private static double ToDegrees(double radians) => radians * 180.0 / Math.PI;
+
+    private static string FormatRadius(double meters) => $"{Math.Round(meters)}m";
 }
