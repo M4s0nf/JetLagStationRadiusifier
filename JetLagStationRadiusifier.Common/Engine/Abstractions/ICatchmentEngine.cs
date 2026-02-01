@@ -1,6 +1,6 @@
 ﻿using JetLagStationRadiusifier.Common.Models;
 
-namespace JetLagStationRadiusifier.Common.Engine;
+namespace JetLagStationRadiusifier.Common.Engine.Abstractions;
 
 public interface ICatchmentEngine
 {
