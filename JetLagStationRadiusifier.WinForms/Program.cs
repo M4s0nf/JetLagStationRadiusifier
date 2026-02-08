@@ -1,5 +1,8 @@
 using JetLagStationRadiusifier.Common.Engine;
 using JetLagStationRadiusifier.Common.Engine.Abstractions;
+using JetLagStationRadiusifier.Common.Runners;
+using JetLagStationRadiusifier.Common.Runners.Abstractions;
+using JetLagStationRadiusifier.WinForms.Forms;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -21,6 +24,7 @@ internal static class Program
 
         // Services
         builder.Services.AddSingleton<FrmMain>();
+        builder.Services.AddSingleton<ICatchmentRunner, CatchmentRunner>();
         builder.Services.AddTransient<ICatchmentEngine, CatchmentEngine>();
 
         using var host = builder.Build();

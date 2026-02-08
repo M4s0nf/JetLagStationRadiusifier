@@ -18,5 +18,5 @@ public readonly struct Distance
         Metres = meters;
     }
 
-    public static Distance FromMeters(double meters) => new(meters);
+    public static Distance FromMetres(double meters) => new(meters);
 }

@@ -1,8 +1,14 @@
-﻿using JetLagStationRadiusifier.Common.Results;
+﻿using JetLagStationRadiusifier.Common.Contracts;
+using JetLagStationRadiusifier.Common.Results;
 
 namespace JetLagStationRadiusifier.Common.Runners.Abstractions;
 
 public interface ICatchmentRunner
 {
-    ServiceResult Run();
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="request"></param>
+    /// <returns></returns>
+    ServiceResult Run(CatchmentRequestDto request);
 }

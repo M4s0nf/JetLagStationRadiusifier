@@ -2,6 +2,6 @@
 
 public enum DistanceUnit
 {
-    Meters = 0,
+    Metres = 0,
     Feet = 1,
 }
