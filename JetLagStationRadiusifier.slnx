@@ -1,4 +1,8 @@
 <Solution>
+  <Folder Name="/SoluitionItems/">
+    <File Path=".gitignore" />
+    <File Path="README.md" />
+  </Folder>
   <Project Path="JetLagStationRadiusifier.Common/JetLagStationRadiusifier.Common.csproj" />
   <Project Path="JetLagStationRadiusifier.WinForms/JetLagStationRadiusifier.WinForms.csproj" />
 </Solution>
