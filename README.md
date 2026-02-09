@@ -1,53 +1,42 @@
-# Jet Lag: The Game Hide & Seek Home Game Station Radiusifier
+# Jet Lag: The Game – Hide & Seek Station Radiusifier
 
-Turn raw station KML files into clear, visual catchment maps in seconds.
+Simple WinForms tool for generating radius borders around stations for Jet Lag: The Game home Hide & Seek.
 
-This tool takes existing station/location data and produces clean radius polygons around every station — ready for use in mapping tools like Google Earth, Google My Maps, GIS platforms, or planning workflows.
+## What it does
 
-Originally built to support home games of Jet Lag: The Game – Hide & Seek mode, where fast, accurate station catchment visualisation is essential for game design and balancing.
+Import a KML layer containing placemarks (for example: train stations), choose a radius, and the app generates a circular border around every selected station.
 
-## What This Project Does
-### 📍 Generates Station Catchment Areas
+The result is a new KML file you can open directly in Google Earth, Google My Maps, or any GIS viewer.
 
-Every station point in your KML file gets a circular catchment polygon at a defined radius. No manual drawing. No GIS knowledge required.
+## Purpose
 
-Perfect for building play zones and movement boundaries in Jet Lag: The Game home versions, or any project that needs station-based distance visualisation.
+Built for planning Jet Lag: The Game Hide & Seek home games. It removes the need to manually draw movement or control zones around stations and produces consistent, accurate results in seconds.
 
-### 🧠 Geographically Correct Calculations
+Useful for:
 
-Catchments are calculated using spherical Earth math — not flat map approximations — so distances remain accurate regardless of location on the globe.
+* Designing Hide & Seek maps
+* Balancing movement rules
+* Visualising station coverage
+* Any station-based distance mapping
 
-This matters when players are making strategic decisions based on real travel distance.
+## Features
 
-### 🎨 Clear, Readable Map Styling
+* Import KML with station placemarks
+* Configurable radius distance
+* Accurate geographic radius calculation (not flat-map drawing)
+* Clean visual styling for readability
+* Outputs a ready-to-use KML file
 
-Catchments are styled automatically for visibility:
+## How to use
 
-Solid border for clear boundary definition
+1. Open the app
+2. Load your KML file
+3. Choose a radius and units
+4. Generate borders
+5. Open the new KML in your preferred map viewer
 
-Soft translucent fill so base map detail stays visible
+## Output
 
-Consistent visual rules across all stations
+A new KML file containing circular radius borders around each station placemark, ready for immediate use in mapping tools.
 
-Designed for presentation, planning, gameplay maps, and analysis — not clutter.
-
-### 🗂 Clean KML Output Structure
-
-The generated catchments are placed into a dedicated map layer inside the KML file, keeping your original station data intact and the output easy to work with.
-
-You can toggle catchments on/off easily during game planning.
-
-## What You Get
-
-Input: a KML file containing station points
-Output: the same file, enhanced with:
-
-- ✔ Catchment polygons
-- ✔ Proper map styling
-- ✔ Organised layer structure
-- ✔ Geographically accurate geometry
-
-No extra software required beyond a KML viewer.
-
-## Vision
-A lightweight, fast tool for turning raw location data into professional, presentation-ready catchment maps — especially for strategic, map-based games like Jet Lag Hide & Seek — without needing full GIS software.
+No GIS experience required.
