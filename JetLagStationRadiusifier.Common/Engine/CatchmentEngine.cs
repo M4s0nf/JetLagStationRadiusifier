@@ -1,9 +1,9 @@
-﻿using System.Globalization;
-using System.Xml.Linq;
-using JetLagStationRadiusifier.Common.Engine.Abstractions;
+﻿using JetLagStationRadiusifier.Common.Engine.Abstractions;
 using JetLagStationRadiusifier.Common.Helpers;
 using JetLagStationRadiusifier.Common.Infrastructure.Kml;
 using JetLagStationRadiusifier.Common.Models;
+using System.Globalization;
+using System.Xml.Linq;
 
 namespace JetLagStationRadiusifier.Common.Engine;
 
@@ -50,8 +50,7 @@ public sealed class CatchmentEngine : ICatchmentEngine
 
         var catchmentsFolderElement = new XElement(
             kmlNamespace + KmlSchema.Folder,
-            new XElement(kmlNamespace + KmlSchema.Name, definition.KmlLayerName)
-        );
+            new XElement(kmlNamespace + KmlSchema.Name, definition.KmlLayerName));
 
         // Materialize to a list: we'll be adding new nodes under <Document> and don't want deferred-enum surprises.
         var stationPlacemarks = documentElement
@@ -105,8 +104,10 @@ public sealed class CatchmentEngine : ICatchmentEngine
             }
 
             var circleCoordinates = BuildCircleCoordinates(
-                latitudeDegrees, longitudeDegrees, definition.Radius.Metres, definition.Segments
-            );
+                latitudeDegrees,
+                longitudeDegrees,
+                definition.Radius.Metres,
+                definition.Segments);
 
             var catchmentPlacemarkElement =
                 new XElement(kmlNamespace + KmlSchema.Placemark,
@@ -180,8 +181,7 @@ public sealed class CatchmentEngine : ICatchmentEngine
 
             coordinateTuples[segmentIndex] = string.Create(
                 CultureInfo.InvariantCulture,
-                $"{destinationLongitude},{destinationLatitude},{KmlSchema.RingAltitude}"
-            );
+                $"{destinationLongitude},{destinationLatitude},{KmlSchema.RingAltitude}");
         }
 
         // KML rings must repeat the first coordinate at the end to "close" the polygon.
@@ -196,9 +196,9 @@ public sealed class CatchmentEngine : ICatchmentEngine
         double bearingDegrees,
         double distanceMeters)
     {
-        var latitudeRadians = ToRadians(latitudeDegrees);
-        var longitudeRadians = ToRadians(longitudeDegrees);
-        var bearingRadians = ToRadians(bearingDegrees);
+        var latitudeRadians = MathsHelper.ToRadians(latitudeDegrees);
+        var longitudeRadians = MathsHelper.ToRadians(longitudeDegrees);
+        var bearingRadians = MathsHelper.ToRadians(bearingDegrees);
 
         double angularDistance = distanceMeters / EarthRadiusMeters;
 
@@ -214,13 +214,9 @@ public sealed class CatchmentEngine : ICatchmentEngine
                 Math.Cos(angularDistance) - Math.Sin(latitudeRadians) * Math.Sin(destinationLatitudeRadians));
 
         // KML longitudes should be normalized to [-180, 180) to avoid wrapping artefacts.
-        var destinationLongitudeDegreesNormalised = ((ToDegrees(destinationLongitudeRadians) + 540) % 360) - 180;
-        return (ToDegrees(destinationLatitudeRadians), destinationLongitudeDegreesNormalised);
+        var destinationLongitudeDegreesNormalised = ((MathsHelper.ToDegrees(destinationLongitudeRadians) + 540) % 360) - 180;
+        return (MathsHelper.ToDegrees(destinationLatitudeRadians), destinationLongitudeDegreesNormalised);
     }
-
-    private static double ToRadians(double degrees) => degrees * Math.PI / 180.0;
-
-    private static double ToDegrees(double radians) => radians * 180.0 / Math.PI;
 
     private static string FormatRadius(double meters) => $"{Math.Round(meters)}m";
 }
