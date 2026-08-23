@@ -35,7 +35,7 @@ partial class FrmMain
         btnBrowseOutput = new Button();
         btnRun = new Button();
         lblSourceKml = new Label();
-        lblDestinationKml = new Label();
+        lblDestinationFolder = new Label();
         grpKmlPaths = new GroupBox();
         grpColour = new GroupBox();
         txtGreenPreview = new TextBox();
@@ -63,9 +63,9 @@ partial class FrmMain
         lblTitle.Font = new Font("Segoe UI", 26.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
         lblTitle.Location = new Point(96, 9);
         lblTitle.Name = "lblTitle";
-        lblTitle.Size = new Size(646, 47);
+        lblTitle.Size = new Size(705, 47);
         lblTitle.TabIndex = 0;
-        lblTitle.Text = "Jet Lag: The Game Hide & Seek Radiusifier";
+        lblTitle.Text = "Jet Lag: The Game Hide and Seek Radiusifier";
         // 
         // txtInputKmlPath
         // 
@@ -89,6 +89,7 @@ partial class FrmMain
         btnBrowseSource.TabIndex = 3;
         btnBrowseSource.Text = "Browse";
         btnBrowseSource.UseVisualStyleBackColor = true;
+        btnBrowseSource.Click += BtnBrowseSource_Click;
         // 
         // btnBrowseOutput
         // 
@@ -98,15 +99,16 @@ partial class FrmMain
         btnBrowseOutput.TabIndex = 4;
         btnBrowseOutput.Text = "Browse";
         btnBrowseOutput.UseVisualStyleBackColor = true;
+        btnBrowseOutput.Click += BtnBrowseOutput_Click;
         // 
         // btnRun
         // 
         btnRun.Enabled = false;
-        btnRun.Location = new Point(680, 398);
+        btnRun.Location = new Point(680, 418);
         btnRun.Name = "btnRun";
-        btnRun.Size = new Size(128, 51);
+        btnRun.Size = new Size(128, 31);
         btnRun.TabIndex = 5;
-        btnRun.Text = "Radiusify";
+        btnRun.Text = "Radiusify!";
         btnRun.UseVisualStyleBackColor = true;
         btnRun.Click += BtnRun_Click;
         // 
@@ -119,26 +121,26 @@ partial class FrmMain
         lblSourceKml.TabIndex = 6;
         lblSourceKml.Text = "Source KML";
         // 
-        // lblDestinationKml
+        // lblDestinationFolder
         // 
-        lblDestinationKml.AutoSize = true;
-        lblDestinationKml.Location = new Point(33, 90);
-        lblDestinationKml.Name = "lblDestinationKml";
-        lblDestinationKml.Size = new Size(94, 15);
-        lblDestinationKml.TabIndex = 7;
-        lblDestinationKml.Text = "Destination KML";
+        lblDestinationFolder.AutoSize = true;
+        lblDestinationFolder.Location = new Point(24, 91);
+        lblDestinationFolder.Name = "lblDestinationFolder";
+        lblDestinationFolder.Size = new Size(103, 15);
+        lblDestinationFolder.TabIndex = 7;
+        lblDestinationFolder.Text = "Destination Folder";
         // 
         // grpKmlPaths
         // 
         grpKmlPaths.Controls.Add(txtInputKmlPath);
-        grpKmlPaths.Controls.Add(lblDestinationKml);
+        grpKmlPaths.Controls.Add(lblDestinationFolder);
         grpKmlPaths.Controls.Add(txtOutputKmlPath);
         grpKmlPaths.Controls.Add(lblSourceKml);
         grpKmlPaths.Controls.Add(btnBrowseSource);
         grpKmlPaths.Controls.Add(btnBrowseOutput);
-        grpKmlPaths.Location = new Point(27, 76);
+        grpKmlPaths.Location = new Point(27, 70);
         grpKmlPaths.Name = "grpKmlPaths";
-        grpKmlPaths.Size = new Size(781, 130);
+        grpKmlPaths.Size = new Size(781, 136);
         grpKmlPaths.TabIndex = 8;
         grpKmlPaths.TabStop = false;
         grpKmlPaths.Text = "Select Source and Destination";
@@ -155,7 +157,7 @@ partial class FrmMain
         grpColour.Controls.Add(btnSelectColour);
         grpColour.Location = new Point(27, 212);
         grpColour.Name = "grpColour";
-        grpColour.Size = new Size(303, 237);
+        grpColour.Size = new Size(398, 237);
         grpColour.TabIndex = 9;
         grpColour.TabStop = false;
         grpColour.Text = "Select Colour";
@@ -234,9 +236,9 @@ partial class FrmMain
         grpDetails.Controls.Add(cmbRadiusUnit);
         grpDetails.Controls.Add(lblRadiusValue);
         grpDetails.Controls.Add(numRadiusValue);
-        grpDetails.Location = new Point(336, 212);
+        grpDetails.Location = new Point(431, 212);
         grpDetails.Name = "grpDetails";
-        grpDetails.Size = new Size(472, 174);
+        grpDetails.Size = new Size(377, 200);
         grpDetails.TabIndex = 10;
         grpDetails.TabStop = false;
         grpDetails.Text = "Additional Details";
@@ -244,7 +246,7 @@ partial class FrmMain
         // lblRadiusUnit
         // 
         lblRadiusUnit.AutoSize = true;
-        lblRadiusUnit.Location = new Point(209, 36);
+        lblRadiusUnit.Location = new Point(65, 46);
         lblRadiusUnit.Name = "lblRadiusUnit";
         lblRadiusUnit.Size = new Size(72, 15);
         lblRadiusUnit.TabIndex = 3;
@@ -253,7 +255,7 @@ partial class FrmMain
         // cmbRadiusUnit
         // 
         cmbRadiusUnit.FormattingEnabled = true;
-        cmbRadiusUnit.Location = new Point(287, 33);
+        cmbRadiusUnit.Location = new Point(143, 43);
         cmbRadiusUnit.Name = "cmbRadiusUnit";
         cmbRadiusUnit.Size = new Size(146, 23);
         cmbRadiusUnit.TabIndex = 2;
@@ -261,7 +263,7 @@ partial class FrmMain
         // lblRadiusValue
         // 
         lblRadiusValue.AutoSize = true;
-        lblRadiusValue.Location = new Point(208, 64);
+        lblRadiusValue.Location = new Point(64, 74);
         lblRadiusValue.Name = "lblRadiusValue";
         lblRadiusValue.Size = new Size(73, 15);
         lblRadiusValue.TabIndex = 1;
@@ -269,7 +271,7 @@ partial class FrmMain
         // 
         // numRadiusValue
         // 
-        numRadiusValue.Location = new Point(287, 62);
+        numRadiusValue.Location = new Point(143, 72);
         numRadiusValue.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
         numRadiusValue.Name = "numRadiusValue";
         numRadiusValue.Size = new Size(146, 23);
@@ -312,7 +314,7 @@ partial class FrmMain
     private Button btnBrowseOutput;
     private Button btnRun;
     private Label lblSourceKml;
-    private Label lblDestinationKml;
+    private Label lblDestinationFolder;
     private GroupBox grpKmlPaths;
     private GroupBox grpColour;
     private Button btnSelectColour;

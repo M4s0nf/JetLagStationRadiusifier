@@ -1,3 +1,4 @@
+using JetLagStationRadiusifier.Common.Consts;
 using JetLagStationRadiusifier.Common.Contracts;
 using JetLagStationRadiusifier.Common.Enums;
 using JetLagStationRadiusifier.Common.Runners.Abstractions;
@@ -7,6 +8,7 @@ namespace JetLagStationRadiusifier.WinForms.Forms;
 public partial class FrmMain : Form
 {
     private readonly ICatchmentRunner _runner;
+
     public FrmMain(ICatchmentRunner runner)
     {
         InitializeComponent();
@@ -24,9 +26,7 @@ public partial class FrmMain : Form
 
     private void SetRadiusUnits()
     {
-        cmbRadiusUnit.DataSource = Enum.GetValues<DistanceUnit>()
-            .OrderBy(x => x.ToString())
-            .ToList();
+        cmbRadiusUnit.DataSource = Enum.GetValues<DistanceUnit>().ToList();
     }
 
     private void BtnSelectColour_Click(object sender, EventArgs e) => ShowColourPicker();
@@ -49,10 +49,10 @@ public partial class FrmMain : Form
     {
         pnlColourPreview.BackColor = colour;
 
-        var hex = "";
-        var r = "";
-        var g = "";
-        var b = "";
+        var hex = $"#{colour.R:X2}{colour.G:X2}{colour.B:X2}";
+        var r = colour.R.ToString();
+        var g = colour.G.ToString();
+        var b = colour.B.ToString();
 
         txtRedPreview.Text = r;
         txtGreenPreview.Text = g;
@@ -70,8 +70,7 @@ public partial class FrmMain : Form
                 "Please check your inputs and try again.",
                 "Invalid Inputs",
                 MessageBoxButtons.OK,
-                MessageBoxIcon.Warning
-            );
+                MessageBoxIcon.Warning);
 
             return;
         }
@@ -81,16 +80,15 @@ public partial class FrmMain : Form
         {
             MessageBox.Show(
                 this,
-                $"An error occurred while running the process: {runResult.ErrorMessage}", 
+                $"An error occurred while running the process: {runResult.ErrorMessage}",
                 "Error",
                 MessageBoxButtons.OK,
-                MessageBoxIcon.Error
-            );
+                MessageBoxIcon.Error);
 
             return;
         }
 
-        // TODO: show success message
+        MessageBox.Show(this, "Map has been successfully radiusified. Enjoy Jetlagging!");
     }
 
     private CatchmentRequestDto? BuildRequest()
@@ -127,7 +125,7 @@ public partial class FrmMain : Form
             return false;
         }
 
-        if (string.Equals(Path.GetExtension(source), ".kml", StringComparison.OrdinalIgnoreCase) == false)
+        if (string.Equals(Path.GetExtension(source), FileTypes.Kml, StringComparison.OrdinalIgnoreCase) == false)
         {
             return false;
         }
@@ -149,5 +147,44 @@ public partial class FrmMain : Form
         }
 
         return true;
+    }
+
+    private void BtnBrowseSource_Click(object sender, EventArgs e)
+    {
+        var path = GetFilePathFromFileDialog();
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            MessageBox.Show(this, "File not selected, please try again");
+            return;
+        }
+
+        txtInputKmlPath.Text = path;
+    }
+
+    private void BtnBrowseOutput_Click(object sender, EventArgs e)
+    {
+        var path = GetFilePathFromFileDialog();
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            MessageBox.Show(this, "File not selected, please try again");
+            return;
+        }
+
+        txtOutputKmlPath.Text = path;
+    }
+
+    private string GetFilePathFromFileDialog()
+    {
+        using var fileDialog = new OpenFileDialog()
+        {
+            Filter = $"kml files (*{FileTypes.Kml})|*{FileTypes.Kml}",
+        };
+
+        if (fileDialog.ShowDialog() == DialogResult.OK)
+        {
+            return fileDialog.FileName;
+        }
+
+        return string.Empty;
     }
 }
