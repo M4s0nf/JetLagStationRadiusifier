@@ -47,6 +47,11 @@ partial class FrmMain
         pnlColourPreview = new Panel();
         btnSelectColour = new Button();
         grpDetails = new GroupBox();
+        lblGameSize = new Label();
+        radGameSizeCustom = new RadioButton();
+        radGameSizeLarge = new RadioButton();
+        radGameSizeMedium = new RadioButton();
+        radGameSizeSmall = new RadioButton();
         lblRadiusUnit = new Label();
         cmbRadiusUnit = new ComboBox();
         lblRadiusValue = new Label();
@@ -71,6 +76,7 @@ partial class FrmMain
         // 
         txtInputKmlPath.Location = new Point(133, 42);
         txtInputKmlPath.Name = "txtInputKmlPath";
+        txtInputKmlPath.ReadOnly = true;
         txtInputKmlPath.Size = new Size(515, 23);
         txtInputKmlPath.TabIndex = 1;
         // 
@@ -78,6 +84,7 @@ partial class FrmMain
         // 
         txtOutputKmlPath.Location = new Point(133, 87);
         txtOutputKmlPath.Name = "txtOutputKmlPath";
+        txtOutputKmlPath.ReadOnly = true;
         txtOutputKmlPath.Size = new Size(515, 23);
         txtOutputKmlPath.TabIndex = 2;
         // 
@@ -232,6 +239,11 @@ partial class FrmMain
         // 
         // grpDetails
         // 
+        grpDetails.Controls.Add(lblGameSize);
+        grpDetails.Controls.Add(radGameSizeCustom);
+        grpDetails.Controls.Add(radGameSizeLarge);
+        grpDetails.Controls.Add(radGameSizeMedium);
+        grpDetails.Controls.Add(radGameSizeSmall);
         grpDetails.Controls.Add(lblRadiusUnit);
         grpDetails.Controls.Add(cmbRadiusUnit);
         grpDetails.Controls.Add(lblRadiusValue);
@@ -243,10 +255,67 @@ partial class FrmMain
         grpDetails.TabStop = false;
         grpDetails.Text = "Additional Details";
         // 
+        // lblGameSize
+        // 
+        lblGameSize.AutoSize = true;
+        lblGameSize.Location = new Point(30, 86);
+        lblGameSize.Name = "lblGameSize";
+        lblGameSize.Size = new Size(61, 15);
+        lblGameSize.TabIndex = 8;
+        lblGameSize.Text = "Game Size";
+        // 
+        // radGameSizeCustom
+        // 
+        radGameSizeCustom.AutoSize = true;
+        radGameSizeCustom.Location = new Point(98, 115);
+        radGameSizeCustom.Name = "radGameSizeCustom";
+        radGameSizeCustom.Size = new Size(67, 19);
+        radGameSizeCustom.TabIndex = 7;
+        radGameSizeCustom.TabStop = true;
+        radGameSizeCustom.Text = "Custom";
+        radGameSizeCustom.UseVisualStyleBackColor = true;
+        radGameSizeCustom.CheckedChanged += SizeRadio_CheckedChanged;
+        // 
+        // radGameSizeLarge
+        // 
+        radGameSizeLarge.AutoSize = true;
+        radGameSizeLarge.Location = new Point(98, 94);
+        radGameSizeLarge.Name = "radGameSizeLarge";
+        radGameSizeLarge.Size = new Size(54, 19);
+        radGameSizeLarge.TabIndex = 6;
+        radGameSizeLarge.TabStop = true;
+        radGameSizeLarge.Text = "Large";
+        radGameSizeLarge.UseVisualStyleBackColor = true;
+        radGameSizeLarge.CheckedChanged += SizeRadio_CheckedChanged;
+        // 
+        // radGameSizeMedium
+        // 
+        radGameSizeMedium.AutoSize = true;
+        radGameSizeMedium.Location = new Point(98, 75);
+        radGameSizeMedium.Name = "radGameSizeMedium";
+        radGameSizeMedium.Size = new Size(70, 19);
+        radGameSizeMedium.TabIndex = 5;
+        radGameSizeMedium.TabStop = true;
+        radGameSizeMedium.Text = "Medium";
+        radGameSizeMedium.UseVisualStyleBackColor = true;
+        radGameSizeMedium.CheckedChanged += SizeRadio_CheckedChanged;
+        // 
+        // radGameSizeSmall
+        // 
+        radGameSizeSmall.AutoSize = true;
+        radGameSizeSmall.Location = new Point(98, 54);
+        radGameSizeSmall.Name = "radGameSizeSmall";
+        radGameSizeSmall.Size = new Size(54, 19);
+        radGameSizeSmall.TabIndex = 4;
+        radGameSizeSmall.TabStop = true;
+        radGameSizeSmall.Text = "Small";
+        radGameSizeSmall.UseVisualStyleBackColor = true;
+        radGameSizeSmall.CheckedChanged += SizeRadio_CheckedChanged;
+        // 
         // lblRadiusUnit
         // 
         lblRadiusUnit.AutoSize = true;
-        lblRadiusUnit.Location = new Point(65, 46);
+        lblRadiusUnit.Location = new Point(19, 25);
         lblRadiusUnit.Name = "lblRadiusUnit";
         lblRadiusUnit.Size = new Size(72, 15);
         lblRadiusUnit.TabIndex = 3;
@@ -255,7 +324,7 @@ partial class FrmMain
         // cmbRadiusUnit
         // 
         cmbRadiusUnit.FormattingEnabled = true;
-        cmbRadiusUnit.Location = new Point(143, 43);
+        cmbRadiusUnit.Location = new Point(98, 22);
         cmbRadiusUnit.Name = "cmbRadiusUnit";
         cmbRadiusUnit.Size = new Size(146, 23);
         cmbRadiusUnit.TabIndex = 2;
@@ -263,7 +332,7 @@ partial class FrmMain
         // lblRadiusValue
         // 
         lblRadiusValue.AutoSize = true;
-        lblRadiusValue.Location = new Point(64, 74);
+        lblRadiusValue.Location = new Point(19, 150);
         lblRadiusValue.Name = "lblRadiusValue";
         lblRadiusValue.Size = new Size(73, 15);
         lblRadiusValue.TabIndex = 1;
@@ -271,12 +340,13 @@ partial class FrmMain
         // 
         // numRadiusValue
         // 
-        numRadiusValue.Location = new Point(143, 72);
+        numRadiusValue.Location = new Point(98, 148);
+        numRadiusValue.Maximum = new decimal(new int[] { 10000, 0, 0, 0 });
         numRadiusValue.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
         numRadiusValue.Name = "numRadiusValue";
         numRadiusValue.Size = new Size(146, 23);
         numRadiusValue.TabIndex = 0;
-        numRadiusValue.Value = new decimal(new int[] { 1, 0, 0, 0 });
+        numRadiusValue.Value = new decimal(new int[] { 1000, 0, 0, 0 });
         // 
         // FrmMain
         // 
@@ -330,4 +400,9 @@ partial class FrmMain
     private NumericUpDown numRadiusValue;
     private Label lblRadiusUnit;
     private ComboBox cmbRadiusUnit;
+    private RadioButton radGameSizeCustom;
+    private RadioButton radGameSizeLarge;
+    private RadioButton radGameSizeMedium;
+    private RadioButton radGameSizeSmall;
+    private Label lblGameSize;
 }

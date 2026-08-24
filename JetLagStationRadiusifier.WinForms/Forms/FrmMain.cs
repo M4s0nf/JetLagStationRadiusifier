@@ -1,6 +1,7 @@
 using JetLagStationRadiusifier.Common.Consts;
 using JetLagStationRadiusifier.Common.Contracts;
 using JetLagStationRadiusifier.Common.Enums;
+using JetLagStationRadiusifier.Common.Helpers;
 using JetLagStationRadiusifier.Common.Runners.Abstractions;
 
 namespace JetLagStationRadiusifier.WinForms.Forms;
@@ -22,11 +23,20 @@ public partial class FrmMain : Form
     {
         SetPreviewColour(Color.Red);
         SetRadiusUnits();
+        InitGameSizeRadios();
     }
 
     private void SetRadiusUnits()
     {
         cmbRadiusUnit.DataSource = Enum.GetValues<DistanceUnit>().ToList();
+    }
+
+    private void InitGameSizeRadios()
+    {
+        radGameSizeSmall.Tag = GameSize.Small;
+        radGameSizeMedium.Tag = GameSize.Medium;
+        radGameSizeLarge.Tag = GameSize.Large;
+        radGameSizeCustom.Tag = GameSize.Custom;
     }
 
     private void BtnSelectColour_Click(object sender, EventArgs e) => ShowColourPicker();
@@ -104,11 +114,14 @@ public partial class FrmMain : Form
         }
 
         var colour = pnlColourPreview.BackColor;
+        var inputPath = txtInputKmlPath.Text.Trim();
+        var outputDirectory = txtOutputKmlPath.Text.Trim();
+        var outputFileName = $"{Path.GetFileNameWithoutExtension(inputPath)}-radiusified{Path.GetExtension(inputPath)}";
 
         return new CatchmentRequestDto
         {
-            InputKmlPath = txtInputKmlPath.Text.Trim(),
-            OutputKmlPath = txtOutputKmlPath.Text.Trim(),
+            InputKmlPath = inputPath,
+            OutputKmlPath = Path.Combine(outputDirectory, outputFileName),
             RadiusUnit = unit,
             Radius = (int)numRadiusValue.Value,
             Red = colour.R,
@@ -151,40 +164,65 @@ public partial class FrmMain : Form
 
     private void BtnBrowseSource_Click(object sender, EventArgs e)
     {
-        var path = GetFilePathFromFileDialog();
-        if (string.IsNullOrWhiteSpace(path))
-        {
-            MessageBox.Show(this, "File not selected, please try again");
-            return;
-        }
-
-        txtInputKmlPath.Text = path;
-    }
-
-    private void BtnBrowseOutput_Click(object sender, EventArgs e)
-    {
-        var path = GetFilePathFromFileDialog();
-        if (string.IsNullOrWhiteSpace(path))
-        {
-            MessageBox.Show(this, "File not selected, please try again");
-            return;
-        }
-
-        txtOutputKmlPath.Text = path;
-    }
-
-    private string GetFilePathFromFileDialog()
-    {
         using var fileDialog = new OpenFileDialog()
         {
             Filter = $"kml files (*{FileTypes.Kml})|*{FileTypes.Kml}",
         };
 
-        if (fileDialog.ShowDialog() == DialogResult.OK)
+        if (fileDialog.ShowDialog() != DialogResult.OK)
         {
-            return fileDialog.FileName;
+            return;
         }
 
-        return string.Empty;
+        txtInputKmlPath.Text = fileDialog.FileName;
+        EnableBtnRunIfUiStateAllows();
+    }
+
+    private void BtnBrowseOutput_Click(object sender, EventArgs e)
+    {
+        using var folderDialog = new FolderBrowserDialog()
+        {
+            Multiselect = false,
+        };
+
+        if (folderDialog.ShowDialog() != DialogResult.OK)
+        {
+            return;
+        }
+
+        txtOutputKmlPath.Text = folderDialog.SelectedPath;
+        EnableBtnRunIfUiStateAllows();
+    }
+
+    private void EnableBtnRunIfUiStateAllows()
+    {
+        btnRun.Enabled = ValidateControls();
+    }
+
+    private void SizeRadio_CheckedChanged(object sender, EventArgs e)
+    {
+        if (sender is not RadioButton sizeRadio)
+        {
+            return;
+        }
+
+        if (sizeRadio.Checked == false)
+        {
+            return;
+        }
+
+        if (sizeRadio.Tag is not GameSize size)
+        {
+            throw new ArgumentException($"{sizeRadio.Name} Tag must be set to a GameSize value.");
+        }
+
+        if (cmbRadiusUnit.SelectedItem is not DistanceUnit selectedUnit)
+        {
+            throw new ArgumentException($"{cmbRadiusUnit.SelectedItem} is not a valid DistanceUnit");
+        }
+
+        numRadiusValue.Value = RadiusPresetHelper.GetPreset(selectedUnit, size);
+        numRadiusValue.Enabled = size == GameSize.Custom;
+        //numRadiusValue.BackColor = num.Enabled ? SystemColors.Window : SystemColors.Control;
     }
 }
