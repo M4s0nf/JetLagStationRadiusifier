@@ -164,14 +164,14 @@ partial class FrmMain
         grpColour.Controls.Add(btnSelectColour);
         grpColour.Location = new Point(27, 212);
         grpColour.Name = "grpColour";
-        grpColour.Size = new Size(398, 237);
+        grpColour.Size = new Size(398, 200);
         grpColour.TabIndex = 9;
         grpColour.TabStop = false;
         grpColour.Text = "Select Colour";
         // 
         // txtGreenPreview
         // 
-        txtGreenPreview.Location = new Point(130, 156);
+        txtGreenPreview.Location = new Point(160, 95);
         txtGreenPreview.Name = "txtGreenPreview";
         txtGreenPreview.ReadOnly = true;
         txtGreenPreview.Size = new Size(67, 23);
@@ -179,7 +179,7 @@ partial class FrmMain
         // 
         // txtBluePreview
         // 
-        txtBluePreview.Location = new Point(203, 156);
+        txtBluePreview.Location = new Point(233, 95);
         txtBluePreview.Name = "txtBluePreview";
         txtBluePreview.ReadOnly = true;
         txtBluePreview.Size = new Size(67, 23);
@@ -187,7 +187,7 @@ partial class FrmMain
         // 
         // txtRedPreview
         // 
-        txtRedPreview.Location = new Point(57, 156);
+        txtRedPreview.Location = new Point(87, 95);
         txtRedPreview.Name = "txtRedPreview";
         txtRedPreview.ReadOnly = true;
         txtRedPreview.Size = new Size(67, 23);
@@ -195,7 +195,7 @@ partial class FrmMain
         // 
         // txtHexPreview
         // 
-        txtHexPreview.Location = new Point(57, 188);
+        txtHexPreview.Location = new Point(87, 127);
         txtHexPreview.Name = "txtHexPreview";
         txtHexPreview.ReadOnly = true;
         txtHexPreview.Size = new Size(213, 23);
@@ -204,7 +204,7 @@ partial class FrmMain
         // lblHex
         // 
         lblHex.AutoSize = true;
-        lblHex.Location = new Point(19, 191);
+        lblHex.Location = new Point(49, 130);
         lblHex.Name = "lblHex";
         lblHex.Size = new Size(30, 15);
         lblHex.TabIndex = 3;
@@ -213,7 +213,7 @@ partial class FrmMain
         // lblRgb
         // 
         lblRgb.AutoSize = true;
-        lblRgb.Location = new Point(19, 159);
+        lblRgb.Location = new Point(49, 98);
         lblRgb.Name = "lblRgb";
         lblRgb.Size = new Size(32, 15);
         lblRgb.TabIndex = 2;
@@ -222,14 +222,14 @@ partial class FrmMain
         // pnlColourPreview
         // 
         pnlColourPreview.BackColor = Color.Red;
-        pnlColourPreview.Location = new Point(57, 86);
+        pnlColourPreview.Location = new Point(87, 25);
         pnlColourPreview.Name = "pnlColourPreview";
         pnlColourPreview.Size = new Size(128, 43);
         pnlColourPreview.TabIndex = 1;
         // 
         // btnSelectColour
         // 
-        btnSelectColour.Location = new Point(191, 86);
+        btnSelectColour.Location = new Point(221, 25);
         btnSelectColour.Name = "btnSelectColour";
         btnSelectColour.Size = new Size(79, 43);
         btnSelectColour.TabIndex = 0;
