@@ -3,8 +3,6 @@
     <File Path=".gitignore" />
     <File Path="README.md" />
   </Folder>
-  <Project Path="JetLagStationRadiusifier.Blazor/JetLagStationRadiusifier.Blazor.Client/JetLagStationRadiusifier.Blazor.Client.csproj" Id="e89ba283-acd0-412e-b04d-366909db4e36" />
-  <Project Path="JetLagStationRadiusifier.Blazor/JetLagStationRadiusifier.Blazor/JetLagStationRadiusifier.Blazor.csproj" Id="a3296e52-1732-4946-b56f-8d05cfeae1a1" />
   <Project Path="JetLagStationRadiusifier.Common/JetLagStationRadiusifier.Common.csproj" />
   <Project Path="JetLagStationRadiusifier.WinForms/JetLagStationRadiusifier.WinForms.csproj" />
 </Solution>
