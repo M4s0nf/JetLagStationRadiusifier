@@ -5,14 +5,9 @@ namespace JetLagStationRadiusifier.Common.Contracts;
 public sealed record CatchmentRequestDto
 {
     /// <summary>
-    /// 
+    /// The input stream of the source KML file.
     /// </summary>
-    public required string InputKmlPath { get; init; }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public required string OutputKmlPath { get; init; }
+    public required Stream InputKmlStream { get; init; }
 
     /// <summary>
     /// 

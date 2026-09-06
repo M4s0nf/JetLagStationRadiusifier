@@ -15,16 +15,10 @@ public sealed class CatchmentEngine : ICatchmentEngine
     private static readonly char[] CoordinateTupleSeparators = [' ', '\n', '\r', '\t'];
 
     /// <inheritdoc/>
-    public void AddCatchments(string inputKmlPath, string outputKmlPath, CatchmentDefinition definition)
+    public XDocument AddCatchments(XDocument kmlDocument, CatchmentDefinition definition)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(inputKmlPath);
-        ArgumentException.ThrowIfNullOrWhiteSpace(outputKmlPath);
+        ArgumentNullException.ThrowIfNull(kmlDocument);
         ArgumentNullException.ThrowIfNull(definition);
-
-        if (File.Exists(inputKmlPath) == false)
-        {
-            throw new FileNotFoundException("Input KML not found.", inputKmlPath);
-        }
 
         // We want a reasonably smooth circle. Very low segment counts look visibly polygonal.
         if (definition.Segments < 8)
@@ -34,7 +28,6 @@ public sealed class CatchmentEngine : ICatchmentEngine
 
         XNamespace kmlNamespace = KmlSchema.NamespaceUri;
 
-        var kmlDocument = XDocument.Load(inputKmlPath);
         var rootElement = kmlDocument.Root ?? throw new InvalidOperationException("Invalid KML: missing root element.");
 
         var documentElement = rootElement.Element(kmlNamespace + KmlSchema.Document);
@@ -123,7 +116,7 @@ public sealed class CatchmentEngine : ICatchmentEngine
         }
 
         documentElement.Add(catchmentsFolderElement);
-        kmlDocument.Save(outputKmlPath);
+        return kmlDocument;
     }
 
     private static string BuildStyleId(CatchmentDefinition definition)

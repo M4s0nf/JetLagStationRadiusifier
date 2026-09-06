@@ -37,9 +37,14 @@ public partial class FrmMain : Form
         radGameSizeMedium.Tag = GameSize.Medium;
         radGameSizeLarge.Tag = GameSize.Large;
         radGameSizeCustom.Tag = GameSize.Custom;
+
+        radGameSizeSmall.Checked = true;
+        cmbRadiusUnit.SelectedValueChanged += CmbRadiusUnit_SelectedIndexChanged;
     }
 
     private void BtnSelectColour_Click(object sender, EventArgs e) => ShowColourPicker();
+
+    private void CmbRadiusUnit_SelectedIndexChanged(object? sender, EventArgs e) => RecalculateRadiusValue();
 
     private void ShowColourPicker()
     {
@@ -70,35 +75,56 @@ public partial class FrmMain : Form
         txtHexPreview.Text = hex;
     }
 
-    private void BtnRun_Click(object sender, EventArgs e)
+    private void BtnRun_Click(object sender, EventArgs e) => RunRequest();
+
+    private void RunRequest()
     {
-        var catchmentRequest = BuildRequest();
-        if (catchmentRequest is null)
+        try
         {
-            MessageBox.Show(
-                this,
-                "Please check your inputs and try again.",
-                "Invalid Inputs",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Warning);
+            var catchmentRequest = BuildRequest();
+            if (catchmentRequest is null)
+            {
+                MessageBox.Show(
+                    this,
+                    "Please check your inputs and try again.",
+                    "Invalid Inputs",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
 
-            return;
+                return;
+            }
+
+            var runResult = _runner.Run(catchmentRequest);
+            if (runResult.IsSuccess == false || runResult.Value is null)
+            {
+                MessageBox.Show(
+                    this,
+                    $"An error occurred while running the process: {runResult.ErrorMessage}",
+                    "Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+
+                return;
+            }
+
+            var radiusifiedKml = runResult.Value;
+            var inputPath = txtInputKmlPath.Text.Trim();
+            var outputDirectory = txtOutputKmlPath.Text.Trim();
+            var outputFileName = $"{Path.GetFileNameWithoutExtension(inputPath)}-radiusified{Path.GetExtension(inputPath)}";
+            var outputKmlPath = Path.Combine(outputDirectory, outputFileName);
+            radiusifiedKml.Save(outputKmlPath);
         }
-
-        var runResult = _runner.Run(catchmentRequest);
-        if (runResult.IsSuccess == false)
+        catch (Exception ex)
         {
             MessageBox.Show(
                 this,
-                $"An error occurred while running the process: {runResult.ErrorMessage}",
-                "Error",
+                $"An unexpected error occurred: {ex.Message}",
+                "Unexpected Error",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Error);
-
-            return;
         }
 
-        MessageBox.Show(this, "Map has been successfully radiusified. Enjoy Jetlagging!");
+        MessageBox.Show(this, "Map has been radiusified. Enjoy JetLagging!");
     }
 
     private CatchmentRequestDto? BuildRequest()
@@ -115,13 +141,11 @@ public partial class FrmMain : Form
 
         var colour = pnlColourPreview.BackColor;
         var inputPath = txtInputKmlPath.Text.Trim();
-        var outputDirectory = txtOutputKmlPath.Text.Trim();
-        var outputFileName = $"{Path.GetFileNameWithoutExtension(inputPath)}-radiusified{Path.GetExtension(inputPath)}";
+        var inputStream = File.OpenRead(inputPath);
 
         return new CatchmentRequestDto
         {
-            InputKmlPath = inputPath,
-            OutputKmlPath = Path.Combine(outputDirectory, outputFileName),
+            InputKmlStream = inputStream,
             RadiusUnit = unit,
             Radius = (int)numRadiusValue.Value,
             Red = colour.R,
@@ -216,13 +240,35 @@ public partial class FrmMain : Form
             throw new ArgumentException($"{sizeRadio.Name} Tag must be set to a GameSize value.");
         }
 
+        if (cmbRadiusUnit.SelectedItem is not DistanceUnit)
+        {
+            throw new ArgumentException($"{cmbRadiusUnit.SelectedItem} is not a valid DistanceUnit");
+        }
+
+        RecalculateRadiusValue();
+        numRadiusValue.Enabled = size == GameSize.Custom;
+    }
+
+    private void RecalculateRadiusValue()
+    {
         if (cmbRadiusUnit.SelectedItem is not DistanceUnit selectedUnit)
         {
             throw new ArgumentException($"{cmbRadiusUnit.SelectedItem} is not a valid DistanceUnit");
         }
 
+        var selectedSizeRadio = new[] { radGameSizeSmall, radGameSizeMedium, radGameSizeLarge, radGameSizeCustom }
+            .FirstOrDefault(radio => radio.Checked) ?? throw new InvalidOperationException("No size radio button is checked.");
+
+        if (selectedSizeRadio.Tag is not GameSize size)
+        {
+            throw new ArgumentException($"{selectedSizeRadio.Name} Tag must be set to a GameSize value.");
+        }
+
+        if (size == GameSize.Custom)
+        {
+            return;
+        }
+
         numRadiusValue.Value = RadiusPresetHelper.GetPreset(selectedUnit, size);
-        numRadiusValue.Enabled = size == GameSize.Custom;
-        //numRadiusValue.BackColor = num.Enabled ? SystemColors.Window : SystemColors.Control;
     }
 }

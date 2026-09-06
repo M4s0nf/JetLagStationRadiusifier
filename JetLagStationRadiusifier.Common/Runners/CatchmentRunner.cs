@@ -4,6 +4,7 @@ using JetLagStationRadiusifier.Common.Enums;
 using JetLagStationRadiusifier.Common.Models;
 using JetLagStationRadiusifier.Common.Results;
 using JetLagStationRadiusifier.Common.Runners.Abstractions;
+using System.Xml.Linq;
 
 namespace JetLagStationRadiusifier.Common.Runners;
 
@@ -13,12 +14,12 @@ public sealed class CatchmentRunner(ICatchmentEngine engine) : ICatchmentRunner
 
     private const double FeetToMetresFactor = 0.3048;
 
-    public ServiceResult Run(CatchmentRequestDto request)
+    public ServiceResult<XDocument> Run(CatchmentRequestDto request)
     {
         var radiusMetersRequest = NormaliseDistanceToMeters(request);
         if (radiusMetersRequest.IsSuccess == false)
         {
-            return ServiceResult.Failure(radiusMetersRequest.ErrorMessage!);
+            return ServiceResult<XDocument>.Failure(radiusMetersRequest.ErrorMessage!);
         }
 
         var radius = Distance.FromMetres(radiusMetersRequest.Value);
@@ -32,14 +33,15 @@ public sealed class CatchmentRunner(ICatchmentEngine engine) : ICatchmentRunner
 
         try
         {
-            _engine.AddCatchments(request.InputKmlPath, request.OutputKmlPath, catchmentDefinition);
+            using var stream = request.InputKmlStream;
+            var kmlDoc = XDocument.Load(stream);
+            var radiusifiedKmlDoc = _engine.AddCatchments(kmlDoc, catchmentDefinition);
+            return ServiceResult<XDocument>.Success(radiusifiedKmlDoc);
         }
         catch (Exception ex)
         {
-            return ServiceResult.Failure($"An error occurred while processing the KML files: {ex.Message}");
+            return ServiceResult<XDocument>.Failure($"An error occurred while processing the KML file: {ex.Message}");
         }
-
-        return ServiceResult.Success();
     }
 
     private static ServiceResult<int> NormaliseDistanceToMeters(CatchmentRequestDto request)
