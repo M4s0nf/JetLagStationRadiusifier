@@ -7,4 +7,12 @@
     <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="Components\Shared\RadiusifierMainCard.razor.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Components\Shared\RadiusifierMainCard.razor.cs" />
+  </ItemGroup>
+
 </Project>
