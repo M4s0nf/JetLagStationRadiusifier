@@ -256,7 +256,7 @@ partial class FrmMain
         // lblGameSize
         // 
         lblGameSize.AutoSize = true;
-        lblGameSize.Location = new Point(30, 54);
+        lblGameSize.Location = new Point(29, 54);
         lblGameSize.Name = "lblGameSize";
         lblGameSize.Size = new Size(61, 15);
         lblGameSize.TabIndex = 8;
@@ -265,7 +265,7 @@ partial class FrmMain
         // radGameSizeCustom
         // 
         radGameSizeCustom.AutoSize = true;
-        radGameSizeCustom.Location = new Point(98, 83);
+        radGameSizeCustom.Location = new Point(97, 83);
         radGameSizeCustom.Name = "radGameSizeCustom";
         radGameSizeCustom.Size = new Size(67, 19);
         radGameSizeCustom.TabIndex = 7;
@@ -277,7 +277,7 @@ partial class FrmMain
         // radGameSizeLarge
         // 
         radGameSizeLarge.AutoSize = true;
-        radGameSizeLarge.Location = new Point(98, 62);
+        radGameSizeLarge.Location = new Point(97, 62);
         radGameSizeLarge.Name = "radGameSizeLarge";
         radGameSizeLarge.Size = new Size(54, 19);
         radGameSizeLarge.TabIndex = 6;
@@ -289,7 +289,7 @@ partial class FrmMain
         // radGameSizeMedium
         // 
         radGameSizeMedium.AutoSize = true;
-        radGameSizeMedium.Location = new Point(98, 43);
+        radGameSizeMedium.Location = new Point(97, 43);
         radGameSizeMedium.Name = "radGameSizeMedium";
         radGameSizeMedium.Size = new Size(70, 19);
         radGameSizeMedium.TabIndex = 5;
@@ -301,7 +301,7 @@ partial class FrmMain
         // radGameSizeSmall
         // 
         radGameSizeSmall.AutoSize = true;
-        radGameSizeSmall.Location = new Point(98, 22);
+        radGameSizeSmall.Location = new Point(97, 22);
         radGameSizeSmall.Name = "radGameSizeSmall";
         radGameSizeSmall.Size = new Size(54, 19);
         radGameSizeSmall.TabIndex = 4;
@@ -313,7 +313,7 @@ partial class FrmMain
         // cmbRadiusUnit
         // 
         cmbRadiusUnit.FormattingEnabled = true;
-        cmbRadiusUnit.Location = new Point(181, 108);
+        cmbRadiusUnit.Location = new Point(177, 108);
         cmbRadiusUnit.Name = "cmbRadiusUnit";
         cmbRadiusUnit.Size = new Size(93, 23);
         cmbRadiusUnit.TabIndex = 2;
@@ -321,7 +321,7 @@ partial class FrmMain
         // lblRadiusValue
         // 
         lblRadiusValue.AutoSize = true;
-        lblRadiusValue.Location = new Point(49, 111);
+        lblRadiusValue.Location = new Point(48, 112);
         lblRadiusValue.Name = "lblRadiusValue";
         lblRadiusValue.Size = new Size(42, 15);
         lblRadiusValue.TabIndex = 1;
