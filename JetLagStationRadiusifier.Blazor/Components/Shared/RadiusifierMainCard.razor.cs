@@ -1,4 +1,5 @@
-﻿using JetLagStationRadiusifier.Common.Enums;
+﻿using JetLagStationRadiusifier.Blazor.Models;
+using JetLagStationRadiusifier.Common.Enums;
 using JetLagStationRadiusifier.Common.Helpers;
 using JetLagStationRadiusifier.Common.Runners.Abstractions;
 using Microsoft.AspNetCore.Components;
@@ -7,32 +8,30 @@ namespace JetLagStationRadiusifier.Blazor.Components.Shared;
 
 partial class RadiusifierMainCard
 {
-    private int _selectedRadiusValue;
-    private DistanceUnit _selectedDistanceUnit = DistanceUnit.Metres;
-    private GameSize _selectedGameSize = GameSize.Medium;
-    private string _catchmentColourHex = "#AA4A44"; // Nice "Brick Red" default colour
-
     [Inject]
     private ICatchmentRunner Runner { get; set; } = default!;
+
+    private RadiusifierMainCardModel _model = new();
 
     private void RunRequest()
     {
 
     }
 
-    private byte GetRedBytesFromHex() => ColourHelper.GetRedBytesFromHex(_catchmentColourHex);
+    private byte GetRedBytesFromHex() => ColourHelper.GetRedBytesFromHex(_model.ColourHex);
 
-    private byte GetGreenBytesFromHex() => ColourHelper.GetGreenBytesFromHex(_catchmentColourHex);
+    private byte GetGreenBytesFromHex() => ColourHelper.GetGreenBytesFromHex(_model.ColourHex);
 
-    private byte GetBlueBytesFromHex() => ColourHelper.GetBlueBytesFromHex(_catchmentColourHex);
+    private byte GetBlueBytesFromHex() => ColourHelper.GetBlueBytesFromHex(_model.ColourHex);
 
-    //private CatchmentRequestDto? BuildRequest()
-    //{
+    private void RecalculateRadiusValue()
+    {
+        var selectedGameSize = _model.GameSize;
+        if (selectedGameSize == GameSize.Custom)
+        {
+            return;
+        }
 
-    //}
-
-    //private bool ValidateControls()
-    //{
-
-    //}
+        _model.RadiusValue = RadiusPresetHelper.GetPreset(_model.RadiusUnit, selectedGameSize);
+    }
 }

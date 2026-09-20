@@ -1,30 +1,37 @@
 ﻿@using JetLagStationRadiusifier.Common.Enums
-<div>
-    <h2>Select a colour</h2>
-    <input type="color" @bind="_catchmentColourHex" />
-    <p>R:@GetRedBytesFromHex().ToString()</p>
-    <p>G:@GetGreenBytesFromHex().ToString()</p>
-    <p>B:@GetBlueBytesFromHex().ToString()</p>
-</div>
-
-<div>
-    <h2>Additional Details</h2>
+<EditForm Model="_model" OnValidSubmit="RunRequest">
     <div>
-        <h3>Game Size</h3>
-        <input type="radio" name="gameSize" />
-        <input type="radio" name="gameSize" />
-        <input type="radio" name="gameSize" />
-        <input type="radio" name="gameSize" />
+        <h2>Select a colour</h2>
+        <input type="color" @bind="_model.ColourHex" />
+        <p>R:<b>@GetRedBytesFromHex().ToString()</b></p>
+        <p>G:<b>@GetGreenBytesFromHex().ToString()</b></p>
+        <p>B:<b>@GetBlueBytesFromHex().ToString()</b></p>
     </div>
 
     <div>
-        <h3>Hiding Zone Size</h3>
-        <input type="number" @bind="_selectedRadiusValue" />
-        <select>
-            @foreach (var unit in Enum.GetValues<DistanceUnit>())
-            {
-                <option value="@unit">@unit</option>
-            }
-        </select>
+        <h2>Additional Details</h2>
+        <div>
+            <h3>Game Size</h3>
+            <InputRadioGroup @bind-Value="_model.GameSize" @bind-Value:after="RecalculateRadiusValue">
+                @foreach (var size in Enum.GetValues<GameSize>())
+                {
+                    <label> <InputRadio Value="size" /> @size </label>
+                }
+            </InputRadioGroup>
+        </div>
+
+        <div>
+            <h3>Hiding Zone Size</h3>
+            <input type="number" @bind="_model.RadiusValue"/>
+            <select @bind="_model.RadiusUnit" @bind:after="RecalculateRadiusValue">
+                @foreach (var unit in Enum.GetValues<DistanceUnit>())
+                {
+                    <option value="@unit">@unit</option>
+                }
+            </select>
+        </div>
     </div>
-</div>
+
+    <br />
+    <button type="submit">Radiusify!</button>
+</EditForm>
