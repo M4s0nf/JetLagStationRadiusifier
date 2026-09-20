@@ -1,6 +1,6 @@
 # Jet Lag: The Game – Hide & Seek Station Radiusifier
 
-Simple WinForms tool for generating radius borders around stations for Jet Lag: The Game home Hide & Seek.
+WinForms / Blazor tool for generating radius borders around stations for Jet Lag: The Game home Hide & Seek.
 
 ## What it does
 
