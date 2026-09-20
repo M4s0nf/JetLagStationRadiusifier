@@ -1,1 +1,30 @@
-﻿<h3>RadiusifierMainCard</h3>
+﻿@using JetLagStationRadiusifier.Common.Enums
+<div>
+    <h2>Select a colour</h2>
+    <input type="color" @bind="_catchmentColourHex" />
+    <p>R:@GetRedBytesFromHex().ToString()</p>
+    <p>G:@GetGreenBytesFromHex().ToString()</p>
+    <p>B:@GetBlueBytesFromHex().ToString()</p>
+</div>
+
+<div>
+    <h2>Additional Details</h2>
+    <div>
+        <h3>Game Size</h3>
+        <input type="radio" name="gameSize" />
+        <input type="radio" name="gameSize" />
+        <input type="radio" name="gameSize" />
+        <input type="radio" name="gameSize" />
+    </div>
+
+    <div>
+        <h3>Hiding Zone Size</h3>
+        <input type="number" @bind="_selectedRadiusValue" />
+        <select>
+            @foreach (var unit in Enum.GetValues<DistanceUnit>())
+            {
+                <option value="@unit">@unit</option>
+            }
+        </select>
+    </div>
+</div>

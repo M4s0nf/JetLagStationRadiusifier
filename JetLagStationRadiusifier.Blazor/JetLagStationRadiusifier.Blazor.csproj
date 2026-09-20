@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -8,11 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Components\Shared\RadiusifierMainCard.razor.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="Components\Shared\RadiusifierMainCard.razor.cs" />
+    <ProjectReference Include="..\JetLagStationRadiusifier.Common\JetLagStationRadiusifier.Common.csproj" />
   </ItemGroup>
 
 </Project>
